@@ -1,0 +1,12 @@
+{% extends 'management/base.html' %}
+
+{% block content %}
+<h2>New Student Registration</h2>
+<p>QR ID: <strong>{{ qr_id }}</strong></p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save Student Details</button>
+</form>
+{% endblock %}

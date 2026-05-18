@@ -1,0 +1,47 @@
+{% extends 'management/base.html' %}
+{% block content %}
+<div class="card">
+    <h2 style="margin-bottom: 5px;">{{ student.name }}</h2>
+    <span style="color: #666;">Class: {{ student.student_class }} | Route: {{ student.bus_route }}</span>
+    
+    <!-- Financial Status Box -->
+    {% if balance_due > 0 %}
+        <div class="status-box status-due">
+            <h3 style="margin: 0;">Total Due: ₹{{ balance_due }}</h3>
+            <small>Includes previous unpaid months</small>
+        </div>
+    {% else %}
+        <div class="status-box status-paid">
+            <h3 style="margin: 0;">All Clear</h3>
+            <small>No outstanding balance</small>
+        </div>
+    {% endif %}
+
+    <hr>
+
+    <h3>Payment History</h3>
+    <div style="max-height: 150px; overflow-y: auto; background: #fafafa; padding: 10px; border-radius: 8px;">
+        {% for fee in fees %}
+            <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee;">
+                <span>{{ fee.month|date:"F Y" }}</span>
+                <span style="color: var(--success); font-weight: bold;">₹{{ fee.amount_paid }}</span>
+            </div>
+        {% empty %}
+            <p style="text-align: center; color: #999;">No payments recorded yet.</p>
+        {% endfor %}
+    </div>
+
+    <hr>
+
+    <form method="post">
+        {% csrf_token %}
+        <h4 style="margin-top: 0;">Collect Monthly Fee</h4>
+        {{ fee_form.as_p }}
+        <button type="submit" class="btn btn-primary">Submit Payment</button>
+    </form>
+</div>
+
+<div style="text-align: center; margin-top: 20px;">
+    <a href="{% url 'scanner_page' %}" style="color: var(--primary); text-decoration: none;">← Back to Scanner</a>
+</div>
+{% endblock %}

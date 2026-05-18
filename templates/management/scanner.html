@@ -1,0 +1,42 @@
+{% extends 'management/base.html' %}
+
+{% block content %}
+<div class="card" style="text-align: center;">
+    <h2>Bus ID Scanner</h2>
+    <p>Please allow camera access to scan IDs</p>
+    
+    <!-- This is where the camera will show -->
+    <div id="reader" style="width: 100%; max-width: 500px; margin: auto;"></div>
+    
+    <div id="result" style="margin-top: 20px; font-weight: bold; color: blue;"></div>
+
+    <!-- Modern Library -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+        function onScanSuccess(decodedText, decodedResult) {
+            // Stop scanning once a code is found
+            html5QrcodeScanner.clear();
+            // Redirect to your Django view
+            window.location.href = "/management/scan/" + decodedText + "/";
+        }
+
+        function onScanFailure(error) {
+            // We ignore failures to keep the camera running smoothly
+        }
+
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", { fps: 10, qrbox: 250 }
+        );
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    </script>
+</div>
+<div class="card" style="margin-top: 20px; border: 2px dashed #ccc;">
+    <h3>Manual Entry</h3>
+    <p>If QR scan fails, enter the Admission Number / ID:</p>
+    <form action="{% url 'manual_lookup' %}" method="GET" style="display: flex; gap: 10px;">
+        <input type="text" name="admission_no" placeholder="e.g. ADM101" required 
+               style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+        <button type="submit" class="btn btn-primary" style="width: auto; padding: 10px 20px;">Find</button>
+    </form>
+</div>
+{% endblock %}
