@@ -46,7 +46,7 @@ def scan_student(request, qr_id):
             new_student = form.save(commit=False)
             new_student.qr_data = qr_entry
             new_student.save()
-            return redirect('scan_student', qr_code_id=qr_id)
+            return redirect('scan_student', qr_id=qr_id)
             
         # Payment Logic
         if fee_form and fee_form.is_valid():
@@ -54,7 +54,7 @@ def scan_student(request, qr_id):
             payment.student = student
             payment.collected_by = request.user
             payment.save()
-            return redirect('scan_student', qr_code_id=qr_id)
+            return redirect('scan_student', qr_id=qr_id)
 
     else:
         # GET Request: Show form or details
@@ -72,7 +72,7 @@ def scan_student(request, qr_id):
         'student': student,
         'fee_form': fee_form,
         'fees': fees,
-        'qr_code_id': qr_id
+        'qr_id': qr_id
     })
 
 def manager_dashboard(request):
