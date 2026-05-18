@@ -5,7 +5,7 @@ class StudentForm(forms.ModelForm):
     class Meta:
         model = Student
         
-        fields = ['name', 'student_class', 'address', 'blood_group', 'bus_route', 'monthly_fee']
+        fields = ['admission_no', 'name', 'student_class', 'parent', 'address', 'blood_group', 'bus_route', 'monthly_fee']
         widgets = {
             'address': forms.Textarea(attrs={'rows': 3}),
         }

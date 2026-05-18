@@ -34,11 +34,11 @@ def scan_student(request, qr_id):
     
     if request.method == 'POST':
         if student:
-            # EDIT MODE: Update existing student
+            
             form = StudentForm(request.POST, instance=student)
-            fee_form = FeePaymentForm(request.POST) # For payment
+            fee_form = FeePaymentForm(request.POST) 
         else:
-            # REGISTRATION MODE: Create new student
+            
             form = StudentForm(request.POST)
             fee_form = None
 
@@ -48,7 +48,7 @@ def scan_student(request, qr_id):
             new_student.save()
             return redirect('scan_student', qr_id=qr_id)
             
-        # Payment Logic
+        
         if fee_form and fee_form.is_valid():
             payment = fee_form.save(commit=False)
             payment.student = student
@@ -57,10 +57,10 @@ def scan_student(request, qr_id):
             return redirect('scan_student', qr_id=qr_id)
 
     else:
-        # GET Request: Show form or details
+        
         if student:
             form = StudentForm(instance=student) # Pre-fill with existing data
-            fee_form = FeePaymentForm()
+            fee_form = FeePaymentForm(initial={'amount_paid': student.monthly_fee})
             fees = student.fees.all().order_by('-month')
         else:
             form = StudentForm()
@@ -84,23 +84,43 @@ def manager_dashboard(request):
     total_delay = 0
 
     for s in students:
-        s.paid_target_month = s.fees.filter(
-            month__year=target_month.year, 
-            month__month=target_month.month
-        ).exists()
-
         start_date = s.created_at.date()
-        diff = relativedelta(target_month, start_date)
-        months_to_bill = (diff.years * 12) + diff.months + 1
         
-        if months_to_bill < 0: months_to_bill =1
-        
-        expected_upto_target = months_to_bill * s.monthly_fee
+        # 1. Total money this student has ever paid
         actual_paid = s.fees.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
-        
-        s.balance = expected_upto_target - actual_paid
+
+        # 2. Check if they joined THIS month (May)
+        if start_date > target_month:
+            # For a student joining this month, target_month (April) doesn't apply to them.
+            # Instead, we check if they have paid for the CURRENT month (May).
+            has_paid_this_month = s.fees.filter(
+                month__year=today.year, 
+                month__month=today.month
+            ).exists()
+            
+            s.paid_target_month = has_paid_this_month
+            
+            if has_paid_this_month:
+                s.balance = 0  # Paid up, clean slate
+            else:
+                s.balance = s.monthly_fee  # Haven't paid May fee yet!
+                
+        else:
+            # 3. OLD STUDENTS LOGIC (Normal billing loop for past months)
+            s.paid_target_month = s.fees.filter(
+                month__year=target_month.year, 
+                month__month=target_month.month
+            ).exists()
+
+            diff = relativedelta(target_month, start_date)
+            months_to_bill = (diff.years * 12) + diff.months + 1
+            
+            expected_upto_target = months_to_bill * s.monthly_fee
+            s.balance = expected_upto_target - actual_paid
+
+        # 4. Add to the manager's total outstanding tracking
         total_delay += max(0, s.balance)
-      
+        
 
     return render(request, 'management/manager_dashboard.html', {
         'students': students,
@@ -116,7 +136,7 @@ def manual_lookup(request):
     
     if student:
         # Redirect to the same scan page using their linked QR ID
-        return redirect('scan_student', qr_id=student.qr_data.qr_id)
+        return redirect('scan_student', qr_id=student.qr_data.qr_code_id)
     else:
         messages.error(request, "Student not found with that Admission Number.")
         return redirect('scanner_page')
