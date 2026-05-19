@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 @login_required
 def login_success(request):
@@ -77,22 +78,21 @@ def scan_student(request, qr_id):
 
 def manager_dashboard(request):
     
-    students = Student.objects.select_related('bus', 'qr_data').order_by('bus__bus_number', 'student_class')
+    all_students = Student.objects.select_related('bus', 'qr_data').all()
+    
     today = date.today()
     target_month = today - relativedelta(months=1)
     total_collection = FeeRecord.objects.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
     total_delay = 0
 
-    for s in students:
+    for s in all_students:
         start_date = s.created_at.date()
         
-        # 1. Total money this student has ever paid
         actual_paid = s.fees.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
 
-        # 2. Check if they joined THIS month (May)
+        
         if start_date > target_month:
-            # For a student joining this month, target_month (April) doesn't apply to them.
-            # Instead, we check if they have paid for the CURRENT month (May).
+            
             has_paid_this_month = s.fees.filter(
                 month__year=today.year, 
                 month__month=today.month
@@ -101,12 +101,12 @@ def manager_dashboard(request):
             s.paid_target_month = has_paid_this_month
             
             if has_paid_this_month:
-                s.balance = 0  # Paid up, clean slate
+                s.balance = 0 
             else:
-                s.balance = s.monthly_fee  # Haven't paid May fee yet!
+                s.balance = s.monthly_fee  
                 
         else:
-            # 3. OLD STUDENTS LOGIC (Normal billing loop for past months)
+            
             s.paid_target_month = s.fees.filter(
                 month__year=target_month.year, 
                 month__month=target_month.month
@@ -120,10 +120,17 @@ def manager_dashboard(request):
 
         # 4. Add to the manager's total outstanding tracking
         total_delay += max(0, s.balance)
-        
 
+    sorted_students = sorted(
+        all_students, 
+        key=lambda x: (
+            str(x.student_class).strip(), 
+            str(getattr(x.bus, 'bus_number', '')).strip(), 
+            x.name
+        )
+)
     return render(request, 'management/manager_dashboard.html', {
-        'students': students,
+        'students': sorted_students,
         'billing_month_name': target_month.strftime('%B'),
         'total_collection': total_collection,
         'total_delay': total_delay,

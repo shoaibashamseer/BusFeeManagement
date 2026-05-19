@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KHM Bus Management</title>
+
+
+    <title> Bus Fee Management</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f4f7f6; }
         nav { background: #333; color: white; padding: 1rem; display: flex; justify-content: space-between; }
@@ -86,11 +88,13 @@
         .status-due { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
         hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
+       
     </style>
+
 </head>
 <body>
     <nav>
-        <strong>KHM Manikoth</strong>
+        <strong>Fee Details</strong>
         <div>
             {% if user.is_authenticated %}
                 <span>Hi, {{ user.username }}</span>

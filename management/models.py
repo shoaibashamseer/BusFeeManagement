@@ -22,14 +22,13 @@ class Bus(models.Model):
     
 class Student(models.Model):
     qr_data = models.OneToOneField(Qrcode_data, on_delete=models.CASCADE)
-    bus = models.ForeignKey(Bus, on_delete=models.SET_NULL, null=True, related_name='students')
+    bus_route = models.ForeignKey(Bus, on_delete=models.SET_NULL, null=True, related_name='students')
     admission_no =  models.CharField(max_length=200 , null=True , blank=True)
     name = models.CharField(max_length=200)
     student_class = models.CharField(max_length=50)
     parent = models.CharField(max_length=200)
     address = models.TextField()
     blood_group = models.CharField(max_length=5)
-    bus_route = models.CharField(max_length=100)
     monthly_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     created_at = models.DateTimeField(auto_now_add=True)
 

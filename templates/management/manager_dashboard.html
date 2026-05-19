@@ -21,9 +21,111 @@
         align-items: center;
     }
     .bus-info { font-size: 0.9rem; font-weight: normal; opacity: 0.9; }
-    .bus-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .bus-table th { background: #f4f4f4; text-align: left; padding: 10px; border-bottom: 2px solid #ddd; }
-    .bus-table td { padding: 10px; border-bottom: 1px solid #eee; }
+    
+    .page-link {
+        padding: 8px 16px;
+        text-decoration: none;
+        background-color: #007bff;
+        color: white;
+        border-radius: 4px;
+        transition: background 0.2s;
+    }
+    .page-link:hover {
+        background-color: #0056b3;
+    }
+    .table-card {
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin-top: 15px;
+    }
+
+    /* Key Mobile Viewport Rule */
+    .responsive-table-wrapper {
+        width: 100%;
+        overflow-x: auto; /* Activates side-swiping on small screens */
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dashboard-table {
+        width: 100%;
+        border-collapse: collapse;
+        white-space: nowrap; /* Ensures data doesn't wrap awkwardly */
+    }
+
+    .dashboard-table th {
+    text-align: left !important;
+    padding: 12px 10px;
+    background: #f4f4f4;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #ddd;
+}
+
+
+    .dashboard-table td {
+        text-align: left;
+        padding: 12px 10px;
+        border-bottom: 1px solid #eee;
+        font-size: 14px;
+        vertical-align: middle; /* Keeps text centered vertically within rows */
+    }
+
+    /* UI Badge Optimization */
+    .badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        display: inline-block;
+    }
+    .badge-success { background: #e2f6e9; color: #155724; }
+    .badge-warning { background: #fff3cd; color: #856404; }
+    
+    .text-due { color: #dc3545; font-weight: bold; }
+    .text-clean { color: #28a745; }
+
+    
+            /* Accordion Panel Layouts */
+        .accordion-header {
+            background:  #333;;
+            color: white;
+            padding: 15px 20px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .accordion-header:hover { background: #0056b3; }
+        .student-count { font-size: 13px; font-weight: normal; opacity: 0.9; }
+
+        .accordion-body {
+            display: none; /* Hidden on initial load */
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        /* Localized Tabular Layout Adjustments */
+        .table-card { background: white; border-radius: 0 0 8px 8px; border: 1px solid #ddd; padding: 10px; border-top: none; }
+        .dashboard-table th { text-align: left !important; padding: 12px 10px; background: #f8f9fa; }
+        .dashboard-table td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #eee; }
+
+        /* In-Card Local Pagination Button Styling */
+        .pagination-controls { display: flex; justify-content: center; gap: 5px; margin: 15px 0 5px 0; }
+        .pagination-btn { padding: 6px 12px; background: #e9ecef; border: 1px solid #ced4da; color: #495057; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        .pagination-btn.active { background: #007bff; color: white; border-color: #007bff; font-weight: bold; }
+        .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>
 
 <h2>Manager Dashboard</h2>
@@ -45,58 +147,130 @@
 </div>
 
 <!-- Student List Table -->
-{% regroup students by bus as bus_list %}
-{% for bus_group in bus_list %}
-    <div class="bus-header">
-        <div>
-            <strong>Bus: {{ bus_group.grouper.bus_number }}</strong> 
-            <span class="bus-info">({{ bus_group.grouper.route_name }})</span>
-        </div>
-        <div class="bus-info">
-            Driver: {{ bus_group.grouper.driver_name }} | {{ bus_group.grouper.driver_phone }}
+<!-- Interactive Class-Wise Layout -->
+{% regroup students by student_class as class_list %}
+
+{% for class_group in class_list %}
+    <!-- ACCORDION HEADER (Clickable) -->
+    <button class="accordion-header" onclick="toggleAccordion('class-section-{{ forloop.counter }}')">
+        <span><strong>Class: {{ class_group.grouper }}</strong></span>
+        <span class="student-count">{{ class_group.list|length }} Students Assigned ▾</span>
+    </button>
+
+    <!-- EXPANDABLE ACCORDION BODY (Hidden by default) -->
+    <div id="class-section-{{ forloop.counter }}" class="accordion-body">
+        <div class="table-card shadow-card">
+            <div class="responsive-table-wrapper">
+                <table class="dashboard-table" id="table-class-{{ forloop.counter }}">
+                    <thead>
+                        <tr>
+                            <th>Bus No</th> <!-- Swapped positions: Bus info comes first -->
+                            <th>Student Name</th>
+                            <th>Collected By</th>
+                            <th>Status</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in class_group.list %}
+                        <tr class="student-row">
+                            <td><strong>Bus {{ s.bus.bus_number }}</strong><br><small>{{ s.bus.route_name }}</small></td>
+                            <td>{{ s.name }}</td>
+                            <td>
+                                <small>
+                                {% if s.paid_target_month %}
+                                    {{ s.fees.last.collected_by.username|default:"-" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                                </small>
+                            </td>
+                            <td>
+                                {% if s.paid_target_month %}
+                                    <span class="status-badge bg-paid">Paid</span>
+                                {% else %}
+                                    <span class="status-badge bg-pending">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td class="{% if s.balance > 0 %}text-due{% else %}text-clean{% endif %}">
+                                ₹{{ s.balance }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Client-side Pagination Controls (Generated per group dynamically) -->
+            <div class="pagination-controls" id="pagination-class-{{ forloop.counter }}"></div>
         </div>
     </div>
-
-    <table class="bus-table">
-        <thead>
-            <tr>
-                <th>Class</th>
-                <th>Student Name</th>
-                <th>Collected By</th>
-                <th>Status</th>
-                <th>Balance</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for s in bus_group.list %}
-            <tr>
-                <td>{{ s.student_class }}</td>
-                <td>{{ s.name }}</td>
-                <td>
-                    <small>
-                    {% if s.paid_target_month %}
-                        {{ s.fees.last.collected_by.username|default:"-" }}
-                    {% else %}
-                        -
-                    {% endif %}
-                    </small>
-                </td>
-                <td>
-                    {% if s.paid_target_month %}
-                        <span class="status-badge bg-paid">Paid</span>
-                    {% else %}
-                        <span class="status-badge bg-pending">Pending</span>
-                    {% endif %}
-                </td>
-                <td class="{% if s.balance > 0 %}due{% else %}paid{% endif %}">
-                    ₹{{ s.balance }}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 {% empty %}
-    <div class="card">No buses or students found.</div>
+    <div class="card" style="padding: 20px; text-align: center; color: #666;">No classes or records found.</div>
 {% endfor %}
+<script>
+// 1. Toggles the drop-down accordion view
+function toggleAccordion(elementId) {
+    var item = document.getElementById(elementId);
+    if (item.style.display === "block") {
+        item.style.display = "none";
+    } else {
+        item.style.display = "block";
+        // Initialize dynamic client-side pagination only when opened
+        initLocalPagination(elementId);
+    }
+}
+
+// 2. Safely breaks down deep 50+ student tables into local 20-row views
+function initLocalPagination(containerId) {
+    const container = document.getElementById(containerId);
+    const table = container.querySelector('.dashboard-table');
+    const rows = table.querySelectorAll('tbody .student-row');
+    const controlsContainer = container.querySelector('.pagination-controls');
+    
+    const rowsPerPage = 20;
+    const totalRows = rows.length;
+    const pageCount = Math.ceil(totalRows / rowsPerPage);
+    
+    // Safety exit: Don't show buttons if the group contains less than 20 students
+    if (pageCount <= 1) {
+        controlsContainer.innerHTML = '';
+        return;
+    }
+    
+    // Render target page
+    function showPage(pageIndex) {
+        let start = pageIndex * rowsPerPage;
+        let end = start + rowsPerPage;
+        
+        rows.forEach((row, idx) => {
+            if (idx >= start && idx < end) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Render updated active buttons
+        renderButtons(pageIndex);
+    }
+    
+    // Generate active numbers dynamically
+    function renderButtons(activeIndex) {
+        controlsContainer.innerHTML = '';
+        for (let i = 0; i < pageCount; i++) {
+            let btn = document.createElement('button');
+            btn.innerText = i + 1;
+            btn.className = 'pagination-btn' + (i === activeIndex ? ' active' : '');
+            btn.onclick = function() { showPage(i); };
+            controlsContainer.appendChild(btn);
+        }
+    }
+    
+    // Initial call to load page 1
+    showPage(0);
+}
+</script>
+
 
 {% endblock %}
