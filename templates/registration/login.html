@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>KHM Login</title>
+    <title>Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
@@ -12,7 +12,7 @@
 </head>
 <body>
     <div class="login-card">
-        <h2 style="text-align: center;">KHM Manikoth</h2>
+        <h2 style="text-align: center;">Login</h2>
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}

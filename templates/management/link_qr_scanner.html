@@ -1,0 +1,142 @@
+{% extends 'management/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'management/css/dashboard.css' %}">
+
+{% if messages %}
+<div id="toast-container" class="toast-container">
+    {% for message in messages %}
+    <div class="toast-card {{ message.tags }}">
+        <div class="toast-icon">
+            {% if message.tags == 'success' %}✅{% else %}❌{% endif %}
+        </div>
+        <div class="toast-content">
+            <p>{{ message.message }}</p>
+        </div>
+        <button class="toast-close" onclick="dismissToast(this)">×</button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="scanner-wrapper">
+    <nav class="back-nav">
+        <a href="{% url 'manager_dashboard' %}" class="back-link">← Back to Dashboard</a>
+    </nav>
+
+    <header class="scanner-header">
+        <h1>Link / Re-Map QR Card</h1>
+        <p class="text-muted">Select a student row on the left, then use your camera or a hardware scanner gun to map a card string to their profile.</p>
+    </header>
+
+    <div class="scanner-grid">
+        <!-- Panel 1: Student Roster Selection Matrix -->
+        <main class="panel-card shadow-sm">
+            <div class="panel-inner-header">
+                <h3>1. Select Active Student</h3>
+                <div class="mini-search-box">
+                    <input type="text" id="studentSearch" onkeyup="filterScannerRoster()" placeholder="Type to filter names...">
+                </div>
+            </div>
+
+           <div class="roster-scroll-zone">
+                <table class="roster-table" id="rosterTable">
+                    <thead>
+                        <tr>
+                            <th>Student Detail</th>
+                            <th>Current Card</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% regroup students by student_class as class_groups %}
+
+                        {% for group in class_groups %}
+                            <tr class="class-group-header-row" style="background-color: #f1f5f9; user-select: none;">
+                                <td colspan="2" style="padding: 10px 14px; font-weight: 700; color: #1e293b; font-size: 0.88rem; letter-spacing: 0.03em; border-left: 4px solid #3b82f6;">
+                                    📚 Class {{ group.grouper|default:"Unassigned" }}
+                                    <span style="font-weight: 500; color: #64748b; font-size: 0.78rem; margin-left: 6px;">
+                                        ({{ group.list|length }} entries)
+                                    </span>
+                                </td>
+                            </tr>
+
+                            {% for student in group.list %}
+                            <tr class="selectable-student-row" onclick="selectStudentForMapping('{{ student.id }}', '{{ student.name }}', '{{ student.qr_code|default:'' }}')">
+
+                                <td>
+                                    <div class="student-meta" style="padding: 10px 0;">
+                                        <strong class="s-name" style="display: block; color: #0f172a;">{{ student.name }}</strong>
+                                        <span class="s-adm" style="color: #64748b; font-size: 0.8rem;">Adm: {{ student.admission_no|default:"-" }}</span>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="current-card-badge {% if student.qr_code %}has-card{% else %}no-card{% endif %}" id="badge-{{ student.id }}">
+                                        {% if student.qr_code %}💳 {{ student.qr_code }}{% else %}Unlinked{% endif %}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+
+                        {% empty %}
+                            <tr>
+                                <td colspan="2" class="empty-roster" style="text-align: center; padding: 20px; color: #64748b;">No students available for card mapping.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <!-- Panel 2: Registration Input Operations Desk -->
+        <aside class="panel-card shadow-sm active-assignment-panel">
+            <div class="panel-inner-header">
+                <h3>2. Assign Card Token</h3>
+            </div>
+
+            <!-- Initial Empty Focus Warning View State -->
+            <div id="emptyStatePrompt" class="drawer-empty-prompt">
+                <div class="prompt-icon">👈</div>
+                <h4>No Student Selected</h4>
+                <p>Click on a student profile card from the directory workspace to start the mapping process.</p>
+            </div>
+
+            <!-- Dynamic Action Submission Form -->
+            <div id="mappingFormWrapper" style="display: none;">
+                <div class="focused-student-banner">
+                    <span class="banner-sub">Target Student:</span>
+                    <h2 id="targetStudentName">Select a student</h2>
+                    <div id="targetStudentCurrentPill" class="target-current-pill"></div>
+                </div>
+
+                <!-- Automated Scanner Container Interface matching staff-side -->
+                <div class="camera-scanner-section" style="margin-bottom: 20px;">
+                    <div id="reader" style="width: 100%; border-radius: 8px; overflow: hidden; background: #1e293b;"></div>
+                </div>
+
+                <form id="mappingForm" method="POST" action="" class="assignment-form">
+                    {% csrf_token %}
+                    <input type="hidden" id="selectedStudentId" name="student_id">
+
+                    <div class="input-group-field">
+                        <label for="qrCodeInput">Scanned Code / String Value</label>
+                        <div class="interactive-input-wrapper">
+                            <span class="input-inline-icon">🔑</span>
+                            <input type="text" id="qrCodeInput" name="qr_code" required autocomplete="off" placeholder="Scanned text string value will appear here...">
+                        </div>
+                    </div>
+
+                    <div class="form-action-buttons">
+                        <button type="submit" class="btn-action btn-submit-save">💾 Save Card Assignment Link</button>
+                        <button type="button" class="btn-action btn-cancel-reset" onclick="resetMappingWorkspace()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script src="{% static 'management/js/manager_dashboard.js' %}" type="text/javascript"></script>
+{% endblock %}

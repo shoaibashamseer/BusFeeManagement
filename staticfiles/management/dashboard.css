@@ -1,0 +1,167 @@
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+.stat-card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; border-top: 4px solid #007bff; }
+.stat-card.danger { border-top-color: #dc3545; }
+.stat-card h3 { margin: 0; color: #555; font-size: 0.9rem; text-transform: uppercase; }
+.stat-card p { margin: 10px 0 0; font-size: 1.5rem; font-weight: bold; }
+.status-badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+.bg-paid { background: #d4edda; color: #155724; }
+.bg-pending { background: #f8d7da; color: #721c24; }
+.bus-header {
+    background: var(--dark);
+    color: white;
+    padding: 15px;
+    margin-top: 30px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.bus-info { font-size: 0.9rem; font-weight: normal; opacity: 0.9; }
+
+.page-link {
+    padding: 8px 16px;
+    text-decoration: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+.page-link:hover {
+    background-color: #0056b3;
+}
+.table-card {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-top: 15px;
+}
+
+/* Key Mobile Viewport Rule */
+.responsive-table-wrapper {
+    width: 100%;
+    overflow-x: auto; /* Activates side-swiping on small screens */
+    -webkit-overflow-scrolling: touch;
+}
+
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap; /* Ensures data doesn't wrap awkwardly */
+}
+
+.dashboard-table th {
+    text-align: left !important;
+    padding: 12px 10px;
+    background: #f4f4f4;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #ddd;
+}
+
+
+.dashboard-table td {
+    text-align: left;
+    padding: 12px 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+    vertical-align: middle; /* Keeps text centered vertically within rows */
+}
+
+/* UI Badge Optimization */
+.badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.badge-success {
+    background: #e2f6e9;
+    color: #155724;
+
+}
+
+.badge-warning {
+    background: #fff3cd;
+    color: #856404;
+
+}
+
+.text-due {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.text-clean {
+    color: #28a745;
+
+}
+
+.accordion-header {
+    background:  #333;;
+    color: white;
+    padding: 15px 20px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 6px;
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3s ease;
+}
+
+.accordion-header:hover {
+    background: #0056b3;
+
+}
+
+.student-count {
+    font-size: 13px;
+    font-weight: normal;
+    opacity: 0.9;
+}
+
+.accordion-body {
+    display: none;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+/* Localized Tabular Layout Adjustments */
+.table-card {
+    background: white;
+    border-radius: 0 0 8px 8px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-top: none;
+
+}
+.dashboard-table th {
+    text-align: left !important;
+    padding: 12px 10px;
+    background: #f8f9fa;
+
+}
+.dashboard-table td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #eee; }
+
+/* In-Card Local Pagination Button Styling */
+.pagination-controls { display: flex; justify-content: center; gap: 5px; margin: 15px 0 5px 0; }
+.pagination-btn { padding: 6px 12px; background: #e9ecef; border: 1px solid #ced4da; color: #495057; border-radius: 4px; cursor: pointer; font-size: 13px; }
+.pagination-btn.active { background: #007bff; color: white; border-color: #007bff; font-weight: bold; }
+.pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.action-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.btn-dark { background: #343a40; color: white; text-decoration: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; }
+.btn-primary { background: #007bff; color: white; text-decoration: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; }
+.btn-sm { padding: 4px 8px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; font-size: 13px; color: #444; }
+.badge-danger { background: #f8d7da; color: #721c24; }
+.text-link { color: #007bff; font-weight: bold; text-decoration: none; }

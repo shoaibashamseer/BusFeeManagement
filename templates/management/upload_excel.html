@@ -1,0 +1,13 @@
+{% extends 'management/base.html' %}
+{% block content %}
+<div style="max-width: 500px; margin: 40px auto; padding: 20px; background: white; border: 1px solid #ddd; border-radius: 8px;">
+    <h3>Upload Student Roster Excel Sheet</h3>
+    <p style="font-size: 13px; color: #666;">Ensure columns are organized: Admission No | Name | Class | Parent | Address | Blood Group | Bus Number | Monthly Fee</p>
+    
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="excel_file" accept=".xlsx, .xls" required style="margin: 15px 0;">
+        <button type="submit" class="btn btn-primary" style="width: 100%; display: block; padding: 12px; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Process Roster Upload</button>
+    </form>
+</div>
+{% endblock %}
